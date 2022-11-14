@@ -24,9 +24,8 @@ public class Main {
            shopService.setInfoAboutShopToBase(shop.getNameOfShop(), shop.getAddress(),
                     shop.getSpecializationOfShop(), shop.getNameOfDirector());
 
-            shopService.getInfoAboutShopFromBase();
-            System.out.println(shop.getNameOfShop() + "\t" + shop.getAddress() + "\t" + shop.getSpecializationOfShop()
-                    + "\t" + shop.getNameOfDirector());
+            System.out.println(shopService.getInfoAboutShopFromBase());
+
 
             System.out.println(employeeService.getInfoAboutEmployeeFromDB("Artur"));
         }

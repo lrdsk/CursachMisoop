@@ -5,7 +5,6 @@ import Database.MyDateBase;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,27 +16,33 @@ public class EmployeeService {
         this.dateBase = dateBase;
     }
 
-    public void setInfoAboutEmployeeToDB(Employee employee) throws SQLException {
-        Statement statement = dateBase.getConnection().createStatement();
-        String SQL = String.format("select exists (Select * from employee where employee_id = %d)", employee.getId());
-
-        ResultSet resultSet = statement.executeQuery(SQL);
-
-        resultSet.next();
-        if (!resultSet.getBoolean("exists")) {
-            SQL = String.format("INSERT INTO employee \nvalues (%d,'%s', %d)", employee.getId(), employee.getNameEmployee(),
-                    employee.getSalaryEmployee());
-            statement.executeUpdate(SQL);
-        } else {
-            System.out.println("Неверно, данный id уже занят в таблице.");
-        }
-    }
-
     private Employee mapEmployee(ResultSet result) throws SQLException {
         int employee_id = result.getInt("employee_id");
         String employee_name = result.getString("employee_name");
         int salary = result.getInt("salary");
         return new Employee(employee_id, employee_name, salary);
+    }
+
+    public void setInfoAboutEmployeeToDB(Employee employee) throws SQLException {
+        PreparedStatement statement = dateBase.getConnection().prepareStatement(
+                "select exists (Select * from employee where employee_id = ?)");
+
+        statement.setInt(1,employee.getId());
+        ResultSet result = statement.executeQuery();
+
+        result.next();
+        if (!result.getBoolean("exists")) {
+            statement = dateBase.getConnection().prepareStatement("INSERT INTO employee " +
+                            "values (?, ?, ?)"
+            );
+
+            statement.setInt(1,employee.getId());
+            statement.setString(2,employee.getNameEmployee());
+            statement.setInt(3,employee.getSalaryEmployee());
+            statement.executeUpdate();
+        } else {
+            System.out.println("Неверно, данный id уже занят в таблице.");
+        }
     }
 
     public Employee getInfoAboutEmployeeFromDB(String name) throws SQLException {
